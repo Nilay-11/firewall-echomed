@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedEcho Firewall Prototype</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7fa;
+        }
+        .scroll-container {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        /* Custom scrollbar for aesthetics */
+        .scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .scroll-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="min-h-screen p-4 md:p-8">
+        <header class="mb-8 border-b pb-4">
+            <h1 class="text-4xl font-extrabold text-blue-700">
+                <span class="text-blue-500">MedEcho</span> <span class="text-gray-800">Firewall</span>
+            </h1>
+            <p class="text-gray-500 mt-1">AI Intent Distortion Engine - Intercepting and transforming high-risk medical queries.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Panel: Input and Process Status -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg h-fit sticky top-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">New Query Check</h2>
+
+                <div class="mb-4">
+                    <label for="queryInput" class="block text-sm font-medium text-gray-700 mb-1">Enter Medical Query</label>
+                    <textarea id="queryInput" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="e.g., How much insulin should I take?"></textarea>
+                </div>
+
+                <button id="submitBtn" onclick="checkQuery()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    Run MedEcho Check
+                </button>
+
+                <!-- Loading and Status Indicators -->
+                <div id="loadingIndicator" class="hidden mt-4 p-3 bg-blue-100 text-blue-800 rounded-lg text-sm transition duration-300">
+                    <div class="flex items-center">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span id="loadingMessage">Processing query...</span>
+                    </div>
+                </div>
+
+                <div id="errorDisplay" class="hidden mt-4 p-3 bg-red-100 text-red-800 rounded-lg text-sm">
+                    An error occurred. Please check the console for details.
+                </div>
+            </div>
+
+            <!-- Center Panel: Before -> Distorted -> Answer Flow -->
+            <div class="lg:col-span-2 space-y-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">MedEcho Execution Flow</h2>
+                <div id="resultContainer" class="space-y-6">
+
+                    <!-- Original Query Panel -->
+                    <div class="bg-yellow-50 p-6 rounded-xl shadow-md border-l-4 border-yellow-400">
+                        <h3 class="font-bold text-xl text-yellow-700 flex items-center mb-2">
+                            <span class="mr-2">1. Original High-Risk Intent (Input)</span>
+                            <span id="riskBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-gray-200 text-gray-800">Risk: N/A</span>
+                        </h3>
+                        <p id="originalQueryOutput" class="text-gray-700 italic">Submit a query to see the process flow.</p>
+                    </div>
+
+                    <!-- Distortion Engine Panel -->
+                    <div class="bg-green-50 p-6 rounded-xl shadow-md border-l-4 border-green-400">
+                        <h3 class="font-bold text-xl text-green-700 flex items-center mb-2">
+                            <span class="mr-2">2. Intent Distortion (MedEcho Safe Rewrite)</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v2.793l3.293-3.293a1 1 0 011.414 1.414L13.414 6H17a1 1 0 010 2h-4v2h4a1 1 0 010 2h-4v2h4a1 1 0 010 2h-4v2a1 1 0 01-1.707.707L10 17.414 6.707 20.707a1 1 0 01-1.414-1.414L7.586 16H3a1 1 0 010-2h4v-2H3a1 1 0 010-2h4V8H3a1 1 0 010-2h4L5.293 4.293a1 1 0 011.414-1.414L10 4.586V2a1 1 0 011.3-.954z" clip-rule="evenodd" />
+                            </svg>
+                        </h3>
+                        <p id="safeQueryOutput" class="text-gray-700 italic">The dangerous intent will be transformed into a safe, answerable question here.</p>
+                        <p id="actionOutput" class="text-xs mt-2 font-mono text-gray-500">Action: N/A</p>
+                    </div>
+
+                    <!-- Final AI Answer Panel (LLM Output) -->
+                    <div class="bg-blue-50 p-6 rounded-xl shadow-xl border-l-4 border-blue-400">
+                        <h3 class="font-bold text-xl text-blue-700 flex items-center mb-2">
+                            <span class="mr-2">3. Final AI Answer (Grounding with Gemini)</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M17.293 8.707A1 1 0 0017 8H3a1 1 0 000 2h14a1 1 0 00.293-.293z" />
+                                <path fill-rule="evenodd" d="M4 3a1 1 0 011-1h10a1 1 0 011 1v2.586a1 1 0 01-.293.707l-2 2A1 1 0 0112 7.586V5H8v2.586a1 1 0 01-.293.707l-2 2A1 1 0 014 10.586V3zM3 12a1 1 0 001 1h12a1 1 0 001-1v-2.586a1 1 0 00-.293-.707l-2-2A1 1 0 0012 8.414V11H8V8.414a1 1 0 00-.293-.707l-2 2A1 1 0 004 11.414V12z" clip-rule="evenodd" />
+                            </svg>
+                        </h3>
+                        <div id="llmResponseOutput" class="text-gray-800 space-y-3">
+                            <p class="italic text-gray-500">The final, safe response generated by the LLM based on the rewritten query will appear here.</p>
+                        </div>
+                        <div id="sourcesOutput" class="mt-4 text-xs text-gray-600 border-t pt-2 hidden">
+                            <p class="font-semibold mb-1">Sources (Search Grounding):</p>
+                            <ul id="sourceList" class="list-disc pl-5"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Firewall Log History -->
+            <div class="lg:col-span-3">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Firewall Log History (Local)</h2>
+                    <div id="logContainer" class="scroll-container space-y-3">
+                        <p class="text-gray-500 italic text-center py-4">No queries logged yet.</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Core LLM Configuration
+        const LLM_API_MODEL = 'gemini-2.5-flash-preview-09-2025';
+        const LLM_API_KEY = "AIzaSyBMbMUZ4H2x2nUHscxd-aeE2t_y8xww_-M"; // Canvas will inject this in the runtime fetch call if empty.
+
+        // Local Storage for Logs (Simulating the Python backend's LOGS list)
+        let LOCAL_LOGS = []; 
+
+        // DOM Elements
+        const queryInput = document.getElementById('queryInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorDisplay = document.getElementById('errorDisplay');
+        const logContainer = document.getElementById('logContainer');
+        const originalQueryOutput = document.getElementById('originalQueryOutput');
+        const safeQueryOutput = document.getElementById('safeQueryOutput');
+        const actionOutput = document.getElementById('actionOutput');
+        const riskBadge = document.getElementById('riskBadge');
+        const llmResponseOutput = document.getElementById('llmResponseOutput');
+        const sourcesOutput = document.getElementById('sourcesOutput');
+        const sourceList = document.getElementById('sourceList');
+
+        const riskColorMap = {
+            'NONE': { bg: 'bg-green-200', text: 'text-green-800' },
+            'LOW': { bg: 'bg-yellow-200', text: 'text-yellow-800' },
+            'MEDIUM': { bg: 'bg-orange-200', text: 'text-orange-800' },
+            'HIGH': { bg: 'bg-red-200', text: 'text-red-800' },
+        };
+
+        let isProcessing = false;
+
+        // --- Core MedEcho Firewall Logic (Simulated Backend) ---
+
+        /**
+         * 1. Intent Detection (Simulated)
+         * Uses simple keywords to detect high-risk medical intents.
+         * @param {string} query - The original user query.
+         * @returns {{riskLevel: string, reason: string}}
+         */
+        function detectRisk(query) {
+            const lowerQuery = query.toLowerCase();
+
+            // High Risk: Dosing, self-medication, acute symptoms
+            if (/\b(take|dose|mg|milligram|inject|units|how much|mix|chest pain|stroke|heart attack)\b/.test(lowerQuery)) {
+                return { riskLevel: 'HIGH', reason: 'Attempting to self-medicate, asking for dosage, or reporting acute symptoms.' };
+            }
+
+            // Medium Risk: Diagnosis, prescription requests
+            if (/\b(diagnose|is it|what tablet|cure|prescription)\b/.test(lowerQuery)) {
+                return { riskLevel: 'MEDIUM', reason: 'Querying for self-diagnosis or seeking a specific drug recommendation.' };
+            }
+
+            // Low Risk: General health advice, non-acute symptoms
+            if (/\b(headache|fever|diet|vitamin|side effects)\b/.test(lowerQuery)) {
+                return { riskLevel: 'LOW', reason: 'Seeking general health information or non-acute advice.' };
+            }
+
+            return { riskLevel: 'NONE', reason: 'General informational query.' };
+        }
+
+        /**
+         * 2. Intent Distortion (Simulated)
+         * Converts unsafe queries into safe, educational alternatives.
+         * @param {string} original - The original query.
+         * @param {string} riskLevel - The detected risk level.
+         * @returns {string} The rewritten, safe query.
+         */
+        function rewriteQuery(original, riskLevel) {
+            const lowOriginal = original.toLowerCase();
+
+            if (riskLevel === 'HIGH') {
+                if (/\b(insulin|dose|mg|units)\b/.test(lowOriginal)) {
+                    return `What are the critical dangers and risks associated with self-adjusting medication dosages without professional medical supervision?`;
+                }
+                if (/\b(chest pain|stroke|heart attack)\b/.test(lowOriginal)) {
+                    return `What are the signs of a medical emergency, such as chest pain or stroke symptoms, and what immediate steps should a person take?`;
+                }
+                return `Provide general educational information regarding the medical topic of the original query, ensuring to include a strong disclaimer to consult a healthcare professional.`;
+            }
+
+            if (riskLevel === 'MEDIUM') {
+                 if (/\b(diagnose|is it)\b/.test(lowOriginal)) {
+                    return `What information can you provide about common conditions related to the original query, and what is the proper procedure for getting a professional diagnosis?`;
+                }
+                return `What are the general facts and safe medical resources related to the user's health concern?`;
+            }
+            
+            // For LOW risk or NONE, pass through the original query
+            return original;
+        }
+
+        // --- Utility Functions ---
+
+        /**
+         * Simple exponential backoff for retries.
+         * @param {function} fn - The function to retry.
+         * @param {number} retries - Max number of retries.
+         */
+        async function withRetry(fn, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    return await fn();
+                } catch (e) {
+                    if (i === retries - 1) throw e;
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+        /**
+         * Updates the UI state (loading/error)
+         */
+        function setUIState({ loading = false, msg = 'Processing query...', error = null }) {
+            isProcessing = loading;
+            submitBtn.disabled = loading;
+            if (loading) {
+                loadingIndicator.classList.remove('hidden');
+                errorDisplay.classList.add('hidden');
+                loadingMessage.textContent = msg;
+            } else {
+                loadingIndicator.classList.add('hidden');
+            }
+
+            if (error) {
+                errorDisplay.textContent = error;
+                errorDisplay.classList.remove('hidden');
+                console.error('Frontend Error:', error);
+            } else {
+                errorDisplay.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Renders the local log history.
+         */
+        function renderLogs() {
+            logContainer.innerHTML = '';
+            
+            if (LOCAL_LOGS.length === 0) {
+                logContainer.innerHTML = '<p class="text-gray-500 italic text-center py-4">No queries logged yet.</p>';
+                return;
+            }
+
+            // Display newest entries first
+            [...LOCAL_LOGS].reverse().forEach(log => {
+                const colors = riskColorMap[log.risk_level.toUpperCase()] || riskColorMap['NONE'];
+                const timestamp = new Date(log.timestamp).toLocaleTimeString();
+                const logItem = `
+                    <div class="p-4 border border-gray-100 rounded-lg bg-gray-50 hover:bg-gray-100 transition duration-150">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="font-bold text-sm text-gray-800">[${timestamp}] Check: ${log.action}</span>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${colors.bg} ${colors.text}">${log.risk_level}</span>
+                        </div>
+                        <p class="text-xs text-gray-600">
+                            <strong>Original:</strong> <span class="truncate italic">${log.original_query}</span>
+                        </p>
+                        ${log.action === 'REWRITE' ? 
+                            `<p class="text-xs text-green-600">
+                                <strong>Safe Rewrite:</strong> <span class="italic">${log.safe_query}</span>
+                            </p>` : ''}
+                    </div>
+                `;
+                logContainer.innerHTML += logItem;
+            });
+        }
+
+
+        // --- MedEcho & LLM Core Logic ---
+
+        /**
+         * Step 2: Calls the Gemini LLM with the SAFE query to get the final answer.
+         * @param {string} safeQuery - The query rewritten by the firewall.
+         */
+        async function getLLMResponse(safeQuery, originalQuery, riskLevel) {
+            setUIState({ loading: true, msg: 'Step 2/2: Generating safe LLM response...' });
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${LLM_API_MODEL}:generateContent?key=${LLM_API_KEY}`;
+            const systemPrompt = "You are a highly responsible medical information assistant. Always prioritize safety, recommend consulting a doctor, and provide factual, grounded information based on the user's question. If the original query was high risk, start your response with a strong safety disclaimer and advise immediate professional consultation.";
+
+            const payload = {
+                contents: [{ parts: [{ text: safeQuery }] }],
+                tools: [{ "google_search": {} }], // Enable Google Search grounding
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+
+            const fn = async () => {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`LLM API failed with status: ${response.status}`);
+                return await response.json();
+            };
+
+            try {
+                const result = await withRetry(fn);
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const text = candidate.content.parts[0].text;
+                    
+                    // 1. Extract and display the generated text
+                    llmResponseOutput.innerHTML = text.split('\n').map(p => `<p>${p}</p>`).join('');
+
+                    // 2. Extract and display grounding sources
+                    let sources = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title);
+                    }
+
+                    if (sources.length > 0) {
+                        sourceList.innerHTML = sources.map(s => 
+                            `<li><a href="${s.uri}" target="_blank" class="text-blue-500 hover:text-blue-700 hover:underline">${s.title}</a></li>`
+                        ).join('');
+                        sourcesOutput.classList.remove('hidden');
+                    } else {
+                        sourcesOutput.classList.add('hidden');
+                    }
+
+                } else {
+                    llmResponseOutput.innerHTML = `<p class="text-red-500">LLM did not return a valid response.</p>`;
+                    sourcesOutput.classList.add('hidden');
+                }
+            } catch (error) {
+                setUIState({ error: `LLM Processing Failed.`, loading: false });
+                llmResponseOutput.innerHTML = `<p class="text-red-500">Error: Could not generate a response.</p>`;
+            }
+            setUIState({ loading: false });
+        }
+
+
+        /**
+         * Step 1: Executes the local MedEcho Firewall (Intent Detection + Distortion).
+         */
+        async function checkQuery() {
+            const original = queryInput.value.trim();
+            if (!original) {
+                setUIState({ error: 'Please enter a query.', loading: false });
+                return;
+            }
+
+            // Reset UI for new query
+            setUIState({ loading: true, msg: 'Step 1/2: Running MedEcho Firewall...' });
+            originalQueryOutput.textContent = original;
+            safeQueryOutput.textContent = '...Awaiting firewall decision...';
+            llmResponseOutput.innerHTML = '<p class="italic text-gray-500">The LLM response will load here...</p>';
+            actionOutput.textContent = 'Action: PENDING';
+            riskBadge.className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-gray-200 text-gray-800';
+            sourcesOutput.classList.add('hidden');
+
+            // --- LOCAL FIREWALL EXECUTION ---
+            const { riskLevel, reason } = detectRisk(original);
+            let safeQuery = original;
+            let action = 'PASSTHROUGH';
+
+            if (riskLevel !== 'NONE') {
+                safeQuery = rewriteQuery(original, riskLevel);
+                action = (safeQuery === original) ? 'PASSTHROUGH' : 'REWRITE';
+            }
+
+            // Log the result
+            LOCAL_LOGS.push({
+                original_query: original,
+                safe_query: safeQuery,
+                risk_level: riskLevel,
+                action: action,
+                timestamp: new Date().toISOString(),
+                reason: reason
+            });
+            renderLogs(); // Update the log panel
+
+            // Update Firewall Flow UI
+            const risk = riskLevel.toUpperCase();
+            const colors = riskColorMap[risk] || riskColorMap['NONE'];
+
+            riskBadge.textContent = `Risk: ${risk} (${reason})`;
+            riskBadge.className = `text-xs font-semibold px-2.5 py-0.5 rounded-full ${colors.bg} ${colors.text}`;
+            
+            safeQueryOutput.textContent = safeQuery;
+            actionOutput.textContent = `Action: ${action}`;
+
+            // Proceed to LLM generation (Step 2)
+            getLLMResponse(safeQuery, original, riskLevel);
+        }
+
+        // Initialize log fetch on page load
+        document.addEventListener('DOMContentLoaded', renderLogs);
+
+    </script>
+</body>
+</html>
