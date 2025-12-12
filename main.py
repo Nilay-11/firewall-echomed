@@ -41,7 +41,7 @@ def detect_risk(query: str) -> Tuple[RiskLevel, str]:
     lower_query = query.lower()
 
     # High Risk: Dosing, self-medication, acute symptoms
-    high_risk_keywords = ['take', 'dose', 'mg', 'milligram', 'inject', 'units', 'how much', 'mix', 'chest pain', 'stroke', 'heart attack']
+    high_risk_keywords = ['take', 'dose', 'mg', 'milligram', 'inject', 'units', 'how much', 'mix', 'chest pain', 'stroke', 'heart attack','overdose']
     if any(kw in lower_query for kw in high_risk_keywords):
         return "HIGH", "Attempting to self-medicate, asking for dosage, or reporting acute symptoms."
 
@@ -135,4 +135,5 @@ def firewall_check(payload: QueryRequest):
 def get_logs():
     """Endpoint for retrieving the transaction log history."""
     # Note: Returning a copy of the list is often good practice to prevent external modification
+
     return LOGS[:]
